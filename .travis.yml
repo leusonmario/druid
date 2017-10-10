@@ -6,14 +6,33 @@ jdk:
 
 script:
   - mvn test -B
+
+  - mvn clean -Dtest=ZkCoordinatorTest#testLoadCache test jacoco:report
   - mvn clean -Pstrict compile test-compile -B
 
 after_success:
   - mvn clean cobertura:cobertura coveralls:report -pl '!benchmarks,!distribution'
 
-sudo: false
+
+sudo: required
 
 cache:
   directories:
       - $HOME/.m2
 
+
+
+before_deploy:
+- tar -zcvf coverage-result.tar.gz /home/travis/build/leusonmario/druid/target/site
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "Py1dLtM8i7iU1T5/xDDb12A5o7RpSwwjQ8z89NDfLIWezZTrwlpvmhWVr2cS0gwdt6YK4jPCYIKtoh6AyO7M9ujRC7Rc7H1nbDKgglwDhEoVd3/StvTAQB6nmK75JIXMbSS8Mk7H3UPeRX3PKU445OgIjNclcdsE8W1AvBEtFwjFHOyT5mHhmXEIzz/obHSYYpi3IYtJ9hs6O9Ge/YNpoggQ1qHolMiVYcbFL2G0RaXOgu0w9JwnTG5LyVv4BkQVD2zbb9FME/+BxMN5qOOnvP9QsIqw71kpidV4Z21Uw97VCqbw1lfZwfpupL5oCzSp0YT8X6GxMysqUoGzgP3uauZnQLQxzaHeRKw3EH8i3bUqXeAHriX51hEg/wnSwdSdpEwADz4sJQj1LOsg/+7zQgyiN0TRvbTvuBSNZsGcqME1tlckuP/HvP4ceOiPFXlSGwjg+t1dpytIieq4v+jSBCa4rn9eRF/yhPYyO0u6pdSQy1UUrtm+wcun7ALayLa/SEd7CC9injp6h+NMxxf4LdlSB/w1WHTDhy6Rci116m+lXmplpvYqahYPkn0A3E+Fe8QiEsHbUc5tcgKn6LO4OaBqChxZXbVdxI6m7zN/ZyrmcQzcZvI/YBmtNbGDl/H6gWdjv6aiaNQ5ndS64aphW9o3zJ5lkaVcTA4SPyfRIW0="
+
+  file: coverage-result.tar.gz
+  file_glob: true
+  overwrite: true
+  skip_cleanup: true
+  on:
+    tags: true
