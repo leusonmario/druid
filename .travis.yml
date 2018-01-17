@@ -1,15 +1,28 @@
+
+sudo: required
 language: java
 
 jdk:
   - oraclejdk7
   - oraclejdk8
 
-after_success:
-  - mvn clean cobertura:cobertura coveralls:report -pl '!benchmarks,!distribution'
 
-sudo: false
 
-cache:
-  directories:
-      - $HOME/.m2
+script:
+  - mvn clean cobertura:cobertura -Dtest=AnnouncerTest#testSessionKilled -DfailIfNoTests=false
 
+before_deploy:
+- tar -zcvf coverage-result.tar.gz /home/travis/build/leusonmario/druid/target/site/cobertura
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "kePlCU89jxKlULWg5xpJWY9lUFFXqw5cKkVumDfsEQKNRWAAVAJ1/7bm8eYjZc6gMhaoKRxKoauBUFMrHBO0aEvaYlaI38mb69WSn031JtrgVPzeSP4Ly0VgfSTeJSWbDJj9KQdSJfu+eReK0WadEqS2m9k1C6NjBxwEfTf0CyQj7KA5LAbK4oUOCZISrntznvn7p1b30FUvMQbPcN94qBX51kWRBKhXSrzS7lpx8rMT4ay96kX+cv8oRwi0z1tHfABt1Kt3PRzzyo7EzGjkzRcVW31tqW9bDlY+DlAf3A5w1C04i2cO/A1U0U1GFSgzzLqZYee19HYiefXpz+r/+4YqOg8mc1a1DU+BwPzX9xSl3I9yF/9cCF6PevrX3cfXZntivZirg0Ic4oPBorA7Y3xHoOJs4Z7+YQ3c4dPWJtt2Q60obe8WzJv4LgPJm5tiGvUZjBDV40Pxd7Zb8jDjcKqfqcURdj8B7yYtbRCgXahn49y9TQQEBe/eOq2zVdw1by3OADWk5y9evd7BAVwlIaBzN/2sT52/yOamRTFtAveshAqeEzGdZxpjjiSxZbi+QQlBy/vQyEF6vz/9kxxYHX1fTPuSPvUaq6ApbMqg+DiimoyRqNihiSDHk5XMrmQVfxI+6//11m08iQPIzxBr22rkT5S2x1NK5VX1ikGMvDM="
+
+
+  file: coverage-result.tar.gz
+  file_glob: true
+  overwrite: true
+  skip_cleanup: true
+  on:
+    tags: true
